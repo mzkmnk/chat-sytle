@@ -15,7 +15,8 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@chat-style/auth": ["app/frontend/libs/auth/src/index.ts"]
+      "@chat-style/auth": ["app/frontend/libs/auth/src/index.ts"],
+      "@chat-style/user": ["app/bff/libs/user/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
