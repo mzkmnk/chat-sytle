@@ -16,6 +16,7 @@
     "baseUrl": ".",
     "paths": {
       "@chat-style/auth": ["app/frontend/libs/auth/src/index.ts"],
+      "@chat-style/shared": ["app/bff/libs/shared/src/index.ts"],
       "@chat-style/user": ["app/bff/libs/user/src/index.ts"]
     }
   },
