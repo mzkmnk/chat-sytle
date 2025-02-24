@@ -1,14 +1,11 @@
-import { Component } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import {MatButton} from "@angular/material/button";
+import {Component} from '@angular/core';
+import {RouterModule} from '@angular/router';
 
 @Component({
-  imports: [RouterModule, MatButton],
+  imports: [RouterModule],
   selector: 'app-root',
-  template:`
-    <div>
-      <button mat-flat-button>Click me!</button>
-    </div>
+  template: `
+    <router-outlet></router-outlet>
   `
 })
 export class AppComponent {
