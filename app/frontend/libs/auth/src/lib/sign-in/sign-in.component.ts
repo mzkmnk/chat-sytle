@@ -1,7 +1,9 @@
-import {Component, signal} from '@angular/core';
+import {Component, inject, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {MatButton} from "@angular/material/button";
 import {FormsModule} from "@angular/forms";
+import {HttpClient} from "@angular/common/http";
+import {Prisma} from "@prisma/client";
 
 @Component({
   selector: 'lib-sign-in',
@@ -32,6 +34,7 @@ import {FormsModule} from "@angular/forms";
 
       <button
         mat-flat-button
+        (click)="onClickSignIn()"
       >Sign In
       </button>
     </div>
@@ -43,7 +46,16 @@ export class SignInComponent {
 
   password = signal<string>('');
 
+  private readonly http = inject(HttpClient);
+
   onClickSignIn(): void {
 
+    const user: Prisma.UserCreateInput = {
+      email: this.email(),
+      password: this.password()
+    }
+    this.http.post('http://localhost:3000/user/sign-in', user).subscribe(() => {
+      console.log('Ok');
+    })
   }
 }
