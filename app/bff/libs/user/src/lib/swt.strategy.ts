@@ -1,4 +1,4 @@
-import {Injectable} from "@nestjs/common";
+import {Injectable, UnauthorizedException} from "@nestjs/common";
 import {PassportStrategy} from "@nestjs/passport";
 import {ConfigService} from "@nestjs/config";
 import {PrismaService} from "../../../shared/src/lib/prisma.service";
@@ -25,6 +25,10 @@ export class SwtStrategy extends PassportStrategy(Strategy) {
         id: payload.sub,
       }
     })
+
+    if (user === null) {
+      throw new UnauthorizedException();
+    }
 
     return user;
   }

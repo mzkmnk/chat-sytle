@@ -1,13 +1,19 @@
-import {Injectable} from "@nestjs/common";
+import {Injectable, UnauthorizedException} from "@nestjs/common";
 import {Prisma} from "@prisma/client";
 import {PrismaService} from "../../../shared/src/lib/prisma.service";
 import * as bcrypt from 'bcrypt';
 import {PrismaClientKnownRequestError} from "@prisma/client/runtime/client";
+import {ConfigService} from "@nestjs/config";
+import {JwtService} from "@nestjs/jwt";
 
 @Injectable()
 export class UserService {
 
-  constructor(private readonly prismaService: PrismaService) {
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly configService: ConfigService,
+    private readonly jwtService: JwtService,
+  ) {
   }
 
   /**
@@ -15,9 +21,9 @@ export class UserService {
    * ユーザが存在している場合はsignIn、してない場合は登録をしてからsignInをする
    * @param data
    */
-  async signIn(data: Prisma.UserCreateInput): Promise<{ message: string }> {
+  async signIn(data: Prisma.UserCreateInput) {
 
-    const user: Prisma.UserCreateInput | null = await this.prismaService.user.findUnique({
+    const user = await this.prismaService.user.findUnique({
       where: {
         email: data.email
       }
@@ -32,41 +38,54 @@ export class UserService {
     const isPasswordMatch: boolean = await bcrypt.compare(data.password, user.password);
 
     if (isPasswordMatch) {
-      return {
-        message: 'ok'
-      }
+      return await this.generateJwt(user.id, user.email);
     }
 
-    return {
-      message: 'Password is incorrect'
-    }
+    throw new UnauthorizedException();
   }
 
-  async signUp(data: Prisma.UserCreateInput): Promise<{ message: string }> {
+  /**
+   * ユーザ登録
+   * @param data
+   */
+  async signUp(data: Prisma.UserCreateInput) {
     const hashedPassword: string = await bcrypt.hash(data.password, 12);
     try {
-      await this.prismaService.user.create({
+      const user = await this.prismaService.user.create({
         data: {
           email: data.email,
           password: hashedPassword,
         }
       });
 
-      return {
-        message: 'ok'
-      }
+      return await this.generateJwt(user.id, user.email);
     } catch (error: unknown) {
       const prismaError = error as PrismaClientKnownRequestError;
+
       if (prismaError.code === 'P2002') {
-        return {
-          message: 'Email already exists'
-        }
+        throw new UnauthorizedException('User already exists');
       }
 
-      // 対応してないエラーはそのままthrow
-      return {
-        message: 'Internal Server Error'
-      }
+      throw new UnauthorizedException();
+    }
+  }
+
+  /** JWTを生成する */
+  async generateJwt(userId: number, email: string): Promise<{ accessToken: string }> {
+    const payload = {
+      sub: userId,
+      email: email
+    }
+
+    const secret: string = this.configService.get('JWT_SECRET')!;
+
+    const accessToken = await this.jwtService.signAsync(payload, {
+      secret: secret,
+      expiresIn: '1h'
+    })
+
+    return {
+      accessToken
     }
   }
 }

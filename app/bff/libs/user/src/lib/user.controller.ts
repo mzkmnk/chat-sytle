@@ -8,7 +8,7 @@ export class UserController {
   }
 
   @Post('sign-in')
-  signIn(@Body() data: Pick<Prisma.UserCreateInput, 'email' | 'password'>): Promise<{ message: string }> {
+  signIn(@Body() data: Pick<Prisma.UserCreateInput, 'email' | 'password'>) {
     return this.userService.signIn(data);
   }
 }
