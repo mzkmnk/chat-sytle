@@ -1,12 +1,15 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { NxWelcomeComponent } from './nx-welcome.component';
+import {MatButton} from "@angular/material/button";
 
 @Component({
-  imports: [NxWelcomeComponent, RouterModule],
+  imports: [RouterModule, MatButton],
   selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.scss',
+  template:`
+    <div>
+      <button mat-flat-button>Click me!</button>
+    </div>
+  `
 })
 export class AppComponent {
   title = 'frontend';
